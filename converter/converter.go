@@ -1,10 +1,10 @@
 package converter
 
 import (
-	"example.com/test/util"
 	"fmt"
 	"github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/aliceriot/wget2hugo/util"
 	"regexp"
 	"strings"
 )

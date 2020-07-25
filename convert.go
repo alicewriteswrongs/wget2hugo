@@ -1,8 +1,8 @@
 package main
 
 import (
-	"example.com/test/converter"
-	"example.com/test/util"
+	"github.com/aliceriot/wget2hugo/converter"
+	"github.com/aliceriot/wget2hugo/util"
 
 	"fmt"
 	"io/ioutil"

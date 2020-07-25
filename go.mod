@@ -1,4 +1,4 @@
-module example.com/test
+module github.com/aliceriot/wget2hugo
 
 go 1.14
 
