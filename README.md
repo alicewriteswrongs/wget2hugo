@@ -34,14 +34,14 @@ Right now it expects it at `./private/input`
 To build the project do:
 
 ```sh
-go build convert.go
-./convert
+go build
+./wget2hugo
 ```
 
 You can also just run it by doing
 
 ```sh
-go run convert.go
+go run
 ```
 
 This will convert the HTML in the site backup into Markdown, and it will copy
