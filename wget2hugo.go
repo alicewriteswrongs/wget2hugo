@@ -4,6 +4,7 @@ import (
 	"github.com/aliceriot/wget2hugo/converter"
 	"github.com/aliceriot/wget2hugo/util"
 
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,8 +14,8 @@ import (
 )
 
 var replacer = strings.NewReplacer(
-	"private/input",
-	"private/output",
+	source,
+	destination,
 	" ",
 	"_",
 )
@@ -60,6 +61,19 @@ func Walker(path string, info os.FileInfo, err error) error {
 	}
 }
 
+var source string
+var destination string
+
 func main() {
-	filepath.Walk("private/input", Walker)
+	flag.StringVar(&source, "source", "", "location of wget backup source")
+	flag.StringVar(&destination, "destination", "", "output directory")
+
+	flag.Parse()
+
+	if flag.NFlag() == 0 {
+		fmt.Println("wget2hugo: convert a wget backup of a website to hugo-compatible Markdown")
+		flag.PrintDefaults()
+	} else {
+		filepath.Walk(source, Walker)
+	}
 }

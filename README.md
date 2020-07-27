@@ -41,17 +41,13 @@ go build
 You can also just run it by doing
 
 ```sh
-go run
+go run .
 ```
 
-This will convert the HTML in the site backup into Markdown, and it will copy
-it (along with all PDF, .doc, image files, etc) into `private/output/` in a
-format that will work with Hugo. You should then be able to just copy that
-whole directory into your Hugo site's `content` directory.
-
+this will show some usage information. use the `-source` flag to set the source
+directory, and the `-destination` flag to set the output directory.
 
 ### TODO
 
-- rewrite as a binary that takes `-s` source and `-d` destination flags
 - convert HTML text encoding if not UTF-8
 - fix anchor tags to anchors within the page
