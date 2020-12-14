@@ -25,7 +25,9 @@ func Walker(path string, info os.FileInfo, err error) error {
 		"_",
 	)
 
-	newpath := strings.ToLower(replacer.Replace(path))
+	newpath := replacer.Replace(path)
+
+	fmt.Println(newpath)
 
 	// if directory we want to just create the new dir
 	if info.IsDir() {
@@ -76,8 +78,8 @@ func main() {
 		fmt.Println("wget2hugo: convert a wget backup of a website to hugo-compatible Markdown")
 		flag.PrintDefaults()
 	} else {
-		fmt.Println(source)
-		fmt.Println(destination)
+		source, _ = filepath.Abs(source)
+		destination, _ = filepath.Abs(destination)
 		filepath.Walk(source, Walker)
 	}
 }
