@@ -61,10 +61,10 @@ func getConverter() *md.Converter {
 	return converter
 }
 
-func Convert(data []byte) ([]byte, error) {
+func Convert(data []byte, res chan []byte) {
 	converter := getConverter()
 
 	markdown, err := converter.ConvertBytes(data)
 	util.CheckErr(err)
-	return markdown, err
+	res <- markdown
 }

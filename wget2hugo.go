@@ -13,18 +13,18 @@ import (
 	"strings"
 )
 
-var replacer = strings.NewReplacer(
-	source,
-	destination,
-	" ",
-	"_",
-)
-
 var indexMDRegex = regexp.MustCompile(`index.html$|index.htm`)
 
 var mdRegex = regexp.MustCompile(`.html$|.htm$`)
 
 func Walker(path string, info os.FileInfo, err error) error {
+	replacer := strings.NewReplacer(
+		source,
+		destination,
+		" ",
+		"_",
+	)
+
 	newpath := strings.ToLower(replacer.Replace(path))
 
 	// if directory we want to just create the new dir
@@ -39,8 +39,10 @@ func Walker(path string, info os.FileInfo, err error) error {
 	if filepath.Ext(path) == ".htm" || filepath.Ext(path) == ".html" {
 		contents, err := ioutil.ReadFile(path)
 		util.CheckErr(err)
-		markdown, err := converter.Convert(contents)
-		util.CheckErr(err)
+
+		mdchan := make(chan []byte)
+		go converter.Convert(contents, mdchan)
+		markdown := <-mdchan
 
 		var markdownPath string
 		if indexMDRegex.MatchString(newpath) {
@@ -49,14 +51,14 @@ func Walker(path string, info os.FileInfo, err error) error {
 			markdownPath = mdRegex.ReplaceAllString(newpath, ".md")
 		}
 
-		fmt.Println("writing markdown: " + newpath)
+		fmt.Println("writing markdown: " + markdownPath)
 		err = ioutil.WriteFile(markdownPath, markdown, info.Mode().Perm())
 		util.CheckErr(err)
 		return nil
 	} else {
 		// else it's a PDF, word doc, image, etc and we just want to copy it
 		fmt.Println("copying file: " + newpath)
-		util.Copy(path, newpath)
+		go util.Copy(path, newpath)
 		return nil
 	}
 }
@@ -74,6 +76,8 @@ func main() {
 		fmt.Println("wget2hugo: convert a wget backup of a website to hugo-compatible Markdown")
 		flag.PrintDefaults()
 	} else {
+		fmt.Println(source)
+		fmt.Println(destination)
 		filepath.Walk(source, Walker)
 	}
 }
