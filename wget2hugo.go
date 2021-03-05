@@ -39,8 +39,16 @@ func Walker(path string, info os.FileInfo, err error) error {
 
 	// if it's an html file we want to convert to markdown
 	if filepath.Ext(path) == ".htm" || filepath.Ext(path) == ".html" {
-		contents, err := ioutil.ReadFile(path)
+		var contents []byte
+		var err error
+
+		contents, err = ioutil.ReadFile(path)
 		util.CheckErr(err)
+
+		if convertFrom1250 {
+			contents, err = util.DecodeWindows1250(contents)
+			util.CheckErr(err)
+		}
 
 		mdchan := make(chan []byte)
 		go converter.Convert(contents, mdchan)
@@ -67,10 +75,12 @@ func Walker(path string, info os.FileInfo, err error) error {
 
 var source string
 var destination string
+var convertFrom1250 bool
 
 func main() {
 	flag.StringVar(&source, "source", "", "location of wget backup source")
 	flag.StringVar(&destination, "destination", "", "output directory")
+	flag.BoolVar(&convertFrom1250, "convertFrom1250", false, "convert from Windows 1250")
 
 	flag.Parse()
 
