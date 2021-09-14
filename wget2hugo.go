@@ -17,6 +17,8 @@ var indexMDRegex = regexp.MustCompile(`index.html$|index.htm`)
 
 var mdRegex = regexp.MustCompile(`.html$|.htm$`)
 
+var windows1250Regex = regexp.MustCompile(`windows1250`)
+
 func Walker(path string, info os.FileInfo, err error) error {
 	replacer := strings.NewReplacer(
 		source,
@@ -45,7 +47,7 @@ func Walker(path string, info os.FileInfo, err error) error {
 		contents, err = ioutil.ReadFile(path)
 		util.CheckErr(err)
 
-		if convertFrom1250 {
+		if convertFrom1250 && windows1250Regex.MatchString(string(contents)) {
 			contents, err = util.DecodeWindows1250(contents)
 			util.CheckErr(err)
 		}
@@ -68,7 +70,7 @@ func Walker(path string, info os.FileInfo, err error) error {
 	} else {
 		// else it's a PDF, word doc, image, etc and we just want to copy it
 		fmt.Println("copying file: " + newpath)
-		go util.Copy(path, newpath)
+		util.Copy(path, newpath)
 		return nil
 	}
 }
