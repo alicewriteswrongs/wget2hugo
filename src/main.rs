@@ -53,26 +53,5 @@ fn main() {
                 }
             }
         }
-
-        // match entry {
-        //     Ok(dir) => {
-        //         let path = dir.path();
-        //         println!("{}", path.display());
-        //         println!("{}", path.extension().unwrap().to_string_lossy());
-        //     },
-        //     Err(err) => println!("{}", err),
-        // }
     }
-
-    // match entry {
-    //     Ok(dir) => dir.path
-    // }
-
-    // for entry in fs::read_dir(opts.source)? {
-    //     match entry {
-    //         Ok(direntry) => println!("found: {:?}", direntry.path()),
-    //         Err(err) => println!("{}", err),
-    //     }
-    // }
-    // Ok(())
 }
