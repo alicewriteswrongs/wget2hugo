@@ -1,4 +1,7 @@
 use clap::{AppSettings, Clap};
+use html2md::parse_html;
+use std::ffi::OsStr;
+use walkdir::WalkDir;
 
 #[derive(Clap)]
 #[clap(name = "wget2hugo", version = "0.0.1")]
@@ -20,4 +23,56 @@ fn main() {
     println!("Hello, world!");
     println!("source: {}", opts.source);
     println!("dest: {}", opts.destination);
+
+    // let foo = WalkDir::new(opts.source);
+
+    for entry in WalkDir::new(opts.source) {
+        let direntry = entry.unwrap();
+        let path = direntry.path();
+
+        let extension = path.extension().map(|os| os.to_str());
+
+        match extension {
+            // we've got a directory
+            None => {
+                println!("found directory: {}", path.display());
+            },
+            // we've got a file (or something with an extension!)
+            Some(string_ext) => {
+                match string_ext {
+                    Some("htm") | Some("html") => {
+                        println!("found html {}", path.display());
+                    }
+                    Some(ext) => {
+                        println!("another ext:  {}", ext);
+                        println!("at path: {}", path.display());
+                    },
+                    None => {
+                        println!("something went wrong");
+                    }
+                }
+            }
+        }
+
+        // match entry {
+        //     Ok(dir) => {
+        //         let path = dir.path();
+        //         println!("{}", path.display());
+        //         println!("{}", path.extension().unwrap().to_string_lossy());
+        //     },
+        //     Err(err) => println!("{}", err),
+        // }
+    }
+
+    // match entry {
+    //     Ok(dir) => dir.path
+    // }
+
+    // for entry in fs::read_dir(opts.source)? {
+    //     match entry {
+    //         Ok(direntry) => println!("found: {:?}", direntry.path()),
+    //         Err(err) => println!("{}", err),
+    //     }
+    // }
+    // Ok(())
 }
