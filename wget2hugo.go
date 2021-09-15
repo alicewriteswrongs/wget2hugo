@@ -17,7 +17,9 @@ var indexMDRegex = regexp.MustCompile(`index.html$|index.htm`)
 
 var mdRegex = regexp.MustCompile(`.html$|.htm$`)
 
-var windows1250Regex = regexp.MustCompile(`windows1250`)
+var windows1250Regex = regexp.MustCompile(`windows-1252`)
+
+var utf8Regex = regexp.MustCompile(`utf-8`)
 
 func Walker(path string, info os.FileInfo, err error) error {
 	replacer := strings.NewReplacer(
@@ -47,7 +49,10 @@ func Walker(path string, info os.FileInfo, err error) error {
 		contents, err = ioutil.ReadFile(path)
 		util.CheckErr(err)
 
-		if convertFrom1250 && windows1250Regex.MatchString(string(contents)) {
+		// this needs to be improved, there has to be some way
+		// to detect the file encoding and then convert accordingly
+		// it's difficult when dealing with mixed encoding in source material
+		if convertFrom1250 && windows1250Regex.MatchString(string(contents)) && !utf8Regex.MatchString(string(contents)) {
 			contents, err = util.DecodeWindows1250(contents)
 			util.CheckErr(err)
 		}
@@ -69,8 +74,12 @@ func Walker(path string, info os.FileInfo, err error) error {
 		return nil
 	} else {
 		// else it's a PDF, word doc, image, etc and we just want to copy it
-		fmt.Println("copying file: " + newpath)
-		util.Copy(path, newpath)
+		if util.CheckShouldCopy(path, newpath) {
+			fmt.Println("copying file: " + newpath)
+			util.Copy(path, newpath)
+		} else {
+			fmt.Println("destination newer than source for file: " + newpath)
+		}
 		return nil
 	}
 }
