@@ -1,8 +1,8 @@
-use chardetng::EncodingDetector;
 use clap::{AppSettings, Clap};
-use html2md::parse_html;
 use std::fs;
 use walkdir::WalkDir;
+
+mod conversion;
 
 #[derive(Clap)]
 #[clap(name = "wget2hugo", version = "0.0.1")]
@@ -13,21 +13,6 @@ struct Options {
 
     #[clap(short, long)]
     destination: String,
-}
-
-fn convert_to_utf8(bytes: Vec<u8>) -> String {
-    let mut detector = EncodingDetector::new();
-    let slice = bytes.as_slice();
-    detector.feed(slice, true);
-    let encoding = detector.guess(None, true);
-    let (converted, _used, _malformed) = encoding.decode(slice);
-    String::from(converted)
-}
-
-// Take an HTML string and convert it to Markdown using
-// html2md::parse_html
-fn convert_to_markdown(html: String) -> String {
-    parse_html(&html)
 }
 
 fn main() {
@@ -48,7 +33,9 @@ fn main() {
             Some("htm") | Some("html") => {
                 println!("found html {}", path.display());
 
-                let markdown = fs::read(path).map(convert_to_utf8).map(convert_to_markdown);
+                let markdown = fs::read(path)
+                    .map(conversion::bytes_to_utf8)
+                    .map(conversion::html_to_markdown);
 
                 match markdown {
                     Ok(md) => println!("converted! {}", md),
