@@ -38,7 +38,9 @@ fn main() {
                 println!("source path:      {}", source_path.display());
                 println!("destination path: {}", destination_path.display());
 
-                let extension = destination_path.extension().map(|os| os.to_str().unwrap());
+                let extension = destination_path
+                    .extension()
+                    .map(|os| os.to_str().unwrap());
 
                 let operation = match extension {
                     // we've got a directory
@@ -51,7 +53,11 @@ fn main() {
                             destination_path.set_extension("md");
                             fs::write(destination_path, markdown).unwrap()
                         }),
-                    Some(_ext) => fs::copy(source_path, destination_path).map(|_number| ()),
+                    Some(_ext) => {
+                        // this is some other file (maybe a pdf or an image)
+                        // so we just want to copy it
+                        fs::copy(source_path, destination_path).map(|_number| ())
+                    }
                 };
             }
             Err(error) => println!("some error: {}", error),
