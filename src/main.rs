@@ -49,9 +49,9 @@ fn main() {
                     Some("htm") | Some("html") => fs::read(source_path)
                         .map(conversion::bytes_to_utf8)
                         .map(conversion::html_to_markdown)
-                        .map(|markdown| {
+                        .and_then(|markdown| {
                             destination_path.set_extension("md");
-                            fs::write(destination_path, markdown).unwrap()
+                            fs::write(destination_path, markdown)
                         }),
                     Some(_ext) => {
                         // this is some other file (maybe a pdf or an image)
