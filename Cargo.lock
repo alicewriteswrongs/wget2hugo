@@ -643,6 +643,7 @@ dependencies = [
  "clap",
  "encoding_rs",
  "html2md",
+ "regex",
  "walkdir",
 ]
 
