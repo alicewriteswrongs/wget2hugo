@@ -44,7 +44,7 @@ fn main() {
                     .extension()
                     .map(|os| os.to_str().unwrap());
 
-                let operation = match extension {
+                let _operation = match extension {
                     // we've got a directory
                     None => {
                         println!("creating directory {}", destination_path.display());
