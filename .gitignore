@@ -2,3 +2,8 @@ private
 
 /* binary */
 wget2hugo
+
+
+# Added by cargo
+
+/target
