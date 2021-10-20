@@ -5,6 +5,7 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 mod conversion;
+mod ioutil;
 
 #[derive(Clap)]
 #[clap(name = "wget2hugo", version = "0.0.1")]
@@ -32,54 +33,55 @@ fn main() {
         let direntry = entry.unwrap();
         let source_path = direntry.path();
 
-        let destination_path = source_path
+        // same here, if this panics then we won't be able to
+        // have a path to write to anyhow (or something) so
+        // just .unwrap
+        let mut destination_path = source_path
             .strip_prefix(source_dir_path)
-            .map(|relative_path| destination_dir_path.join(relative_path));
+            .map(|relative_path| destination_dir_path.join(relative_path))
+            .unwrap();
 
-        match destination_path {
-            Ok(mut destination_path) => {
-                println!("source path:      {}", source_path.display());
+        println!("source path:      {}", source_path.display());
 
-                let extension = destination_path
-                    .extension()
-                    .map(|os| os.to_str().unwrap());
+        let extension = destination_path
+            .extension()
+            .map(|os| os.to_str().unwrap());
 
-                let _operation = match extension {
-                    // we've got a directory
-                    None => {
-                        println!("creating directory {}", destination_path.display());
-                        fs::create_dir(destination_path)
-                    }
-                    // we've got a file (or something with an extension!)
-                    Some("htm") | Some("html") => fs::read(source_path)
-                        .map(conversion::bytes_to_utf8)
-                        .map(conversion::html_to_markdown)
-                        .and_then(|markdown| {
-                            destination_path.set_extension("md");
-
-                            let is_index_file = destination_path
-                                .file_name()
-                                .and_then(|osstr| osstr.to_str())
-                                .map(|filename| index_regex.is_match(filename))
-                                .unwrap_or(false);
-
-                            if is_index_file {
-                                destination_path.set_file_name("_index.md");
-                            }
-
-                            println!("destination_path: {}", destination_path.display());
-
-                            fs::write(destination_path, markdown)
-                        }),
-                    Some(_ext) => {
-                        // this is some other file (maybe a pdf or an image)
-                        // so we just want to copy it
-                        println!("copying {}", destination_path.display());
-                        fs::copy(source_path, destination_path).map(|_number| ())
-                    }
-                };
+        match extension {
+            // we've got a directory
+            None => {
+                println!("creating directory {}", destination_path.display());
+                ioutil::mkdir(&destination_path);
             }
-            Err(error) => println!("some error: {}", error),
-        }
+            // we've got a file (or something with an extension!)
+            Some("htm") | Some("html") => {
+                fs::read(source_path)
+                    .map(conversion::bytes_to_utf8)
+                    .map(conversion::html_to_markdown)
+                    .and_then(|markdown| {
+                        destination_path.set_extension("md");
+
+                        let is_index_file = destination_path
+                            .file_name()
+                            .and_then(|osstr| osstr.to_str())
+                            .map(|filename| index_regex.is_match(filename))
+                            .unwrap_or(false);
+
+                        if is_index_file {
+                            destination_path.set_file_name("_index.md");
+                        }
+
+                        println!("destination_path: {}", destination_path.display());
+                        fs::write(destination_path, markdown)
+                    })
+                    .unwrap();
+            }
+            Some(_ext) => {
+                // this is some other file (maybe a pdf or an image)
+                // so we just want to copy it
+                println!("copying {}", destination_path.display());
+                ioutil::copy_if_src_newer(source_path, &destination_path).unwrap();
+            }
+        };
     }
 }
