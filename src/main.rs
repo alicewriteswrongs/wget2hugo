@@ -3,6 +3,9 @@ use regex::Regex;
 use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
+use env_logger;
+#[macro_use]
+extern crate log;
 
 mod conversion;
 mod ioutil;
@@ -19,6 +22,8 @@ struct Options {
 }
 
 fn main() {
+    env_logger::init();
+
     let opts: Options = Options::parse();
 
     let source_dir_path = Path::new(&opts.source);
@@ -41,7 +46,7 @@ fn main() {
             .map(|relative_path| destination_dir_path.join(relative_path))
             .unwrap();
 
-        println!("source path:      {}", source_path.display());
+        info!("processing source path {}...", source_path.display());
 
         let extension = destination_path
             .extension()
@@ -50,7 +55,7 @@ fn main() {
         match extension {
             // we've got a directory
             None => {
-                println!("creating directory {}", destination_path.display());
+                info!("creating directory {}", destination_path.display());
                 ioutil::mkdir(&destination_path);
             }
             // we've got a file (or something with an extension!)
@@ -71,7 +76,7 @@ fn main() {
                             destination_path.set_file_name("_index.md");
                         }
 
-                        println!("destination_path: {}", destination_path.display());
+                        info!("writing markdown {}", destination_path.display());
                         fs::write(destination_path, markdown)
                     })
                     .unwrap();
@@ -79,7 +84,6 @@ fn main() {
             Some(_ext) => {
                 // this is some other file (maybe a pdf or an image)
                 // so we just want to copy it
-                println!("copying {}", destination_path.display());
                 ioutil::copy_if_src_newer(source_path, &destination_path).unwrap();
             }
         };

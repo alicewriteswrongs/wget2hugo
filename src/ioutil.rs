@@ -19,8 +19,10 @@ pub fn copy_if_src_newer(from: &path::Path, to: &path::Path) -> io::Result<u64> 
     let to_modified = modified_time(to).unwrap_or(time::SystemTime::UNIX_EPOCH);
 
     if from_modified > to_modified {
+        info!("copying file {}", to.display());
         fs::copy(from, to)
     } else {
+        info!("skipping copy for file {}", to.display());
         Ok(0)
     }
 }
@@ -29,10 +31,10 @@ pub fn copy_if_src_newer(from: &path::Path, to: &path::Path) -> io::Result<u64> 
 pub fn mkdir(path: &path::Path) {
     match fs::create_dir(path) {
         Ok(_) => {
-            println!("created directory {}", path.display());
+            info!("created directory {}", path.display());
         }
         Err(e) => {
-            println!("{} happend when creating directory", e);
+            info!("not creating directory, {}", e);
         }
     }
 }
