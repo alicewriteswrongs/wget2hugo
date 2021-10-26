@@ -6,7 +6,7 @@ authors = [ "Alice Pote" ]
 homepage = "https://github.com/alicewriteswrongs/wget2hugo"
 repository = "https://github.com/alicewriteswrongs/wget2hugo"
 description = "A small utility for converting a wget backup to markdown"
-license = "mit"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
