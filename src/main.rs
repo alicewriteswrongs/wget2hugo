@@ -1,9 +1,9 @@
 use clap::{AppSettings, Clap};
+use env_logger;
 use regex::Regex;
 use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
-use env_logger;
 #[macro_use]
 extern crate log;
 
@@ -55,31 +55,37 @@ fn main() {
         match extension {
             // we've got a directory
             None => {
-                info!("creating directory {}", destination_path.display());
                 ioutil::mkdir(&destination_path);
             }
             // we've got a file (or something with an extension!)
             Some("htm") | Some("html") => {
-                fs::read(source_path)
-                    .map(conversion::bytes_to_utf8)
-                    .map(conversion::html_to_markdown)
-                    .and_then(|markdown| {
-                        destination_path.set_extension("md");
+                destination_path.set_extension("md");
 
-                        let is_index_file = destination_path
-                            .file_name()
-                            .and_then(|osstr| osstr.to_str())
-                            .map(|filename| index_regex.is_match(filename))
-                            .unwrap_or(false);
+                let is_index_file = destination_path
+                    .file_name()
+                    .and_then(|osstr| osstr.to_str())
+                    .map(|filename| index_regex.is_match(filename))
+                    .unwrap_or(false);
 
-                        if is_index_file {
-                            destination_path.set_file_name("_index.md");
-                        }
+                if is_index_file {
+                    destination_path.set_file_name("_index.md");
+                }
 
-                        info!("writing markdown {}", destination_path.display());
-                        fs::write(destination_path, markdown)
-                    })
-                    .unwrap();
+                if ioutil::out_of_date(source_path, &destination_path) {
+                    return fs::read(source_path)
+                        .map(conversion::bytes_to_utf8)
+                        .map(conversion::html_to_markdown)
+                        .and_then(|markdown| {
+                            info!("writing markdown {}", destination_path.display());
+                            fs::write(destination_path, markdown)
+                        })
+                        .unwrap();
+                } else {
+                    info!(
+                        "skipping markdown conversion for {}",
+                        destination_path.display()
+                    );
+                }
             }
             Some(_ext) => {
                 // this is some other file (maybe a pdf or an image)
