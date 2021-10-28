@@ -72,7 +72,7 @@ fn main() {
                 }
 
                 if ioutil::out_of_date(source_path, &destination_path) {
-                    return fs::read(source_path)
+                    fs::read(source_path)
                         .map(conversion::bytes_to_utf8)
                         .map(conversion::html_to_markdown)
                         .and_then(|markdown| {
