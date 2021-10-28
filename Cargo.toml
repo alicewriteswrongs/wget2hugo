@@ -1,6 +1,6 @@
 [package]
 name = "wget2hugo"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = [ "Alice Pote" ]
 homepage = "https://github.com/alicewriteswrongs/wget2hugo"
