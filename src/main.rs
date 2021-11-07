@@ -39,8 +39,7 @@ fn main() {
         let source_path = direntry.path();
 
         // same here, if this panics then we won't be able to
-        // have a path to write to anyhow (or something) so
-        // just .unwrap
+        // have a path to write to anyhow so just .unwrap
         let mut destination_path = source_path
             .strip_prefix(source_dir_path)
             .map(|relative_path| destination_dir_path.join(relative_path))
