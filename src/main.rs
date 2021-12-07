@@ -32,18 +32,13 @@ fn main() {
     let index_regex = Regex::new(r"^index.md$").unwrap();
 
     for entry in WalkDir::new(&opts.source) {
-        // I think it's ok to unwrap this here since we
-        // don't really mind if this panics (if it does, we want
-        // to not do anything anyhow)
-        let direntry = entry.unwrap();
+        let direntry = entry.expect("Target directory should exist");
         let source_path = direntry.path();
 
-        // same here, if this panics then we won't be able to
-        // have a path to write to anyhow so just .unwrap
         let mut destination_path = source_path
             .strip_prefix(source_dir_path)
             .map(|relative_path| destination_dir_path.join(relative_path))
-            .unwrap();
+            .expect("Destination path must exist!");
 
         info!("processing source path {}...", source_path.display());
 
